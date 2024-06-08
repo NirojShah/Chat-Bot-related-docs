@@ -1,0 +1,33 @@
+from transformers import pipeline
+import PyPDF2
+
+def extract_text_from_pdf(pdf_path):
+    text = ""
+    try:
+        with open(pdf_path, 'rb') as file:
+            pdf_reader = PyPDF2.PdfFileReader(file)
+            num_pages = pdf_reader.numPages
+            for page_number in range(num_pages):
+                page = pdf_reader.getPage(page_number)
+                text += page.extractText()
+    except Exception as e:
+        print(f"An error occurred while extracting text from PDF: {e}")
+    return text
+
+pdf_path = "your_pdf_file.pdf"
+pdf_text = extract_text_from_pdf(pdf_path)
+
+if pdf_text:
+    # Initialize question answering pipeline
+    qa_pipeline = pipeline("question-answering")
+
+    # Ask a question
+    question = "What is the main topic of the PDF?"
+    try:
+        answer = qa_pipeline(question=question, context=pdf_text)
+        print("Answer:", answer['answer'])
+        print("Confidence:", answer['score'])
+    except Exception as e:
+        print(f"An error occurred during question answering: {e}")
+else:
+    print("No text extracted from the PDF.")
